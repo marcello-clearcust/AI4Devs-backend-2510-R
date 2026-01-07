@@ -152,6 +152,97 @@ paths:
           description: Bad request (invalid input data)
         '500':
           description: Internal server error
+  /candidates/{id}/stage:
+    put:
+      summary: Update candidate interview stage
+      description: Updates the current interview step for a candidate's application. Validates that the candidate exists, the application exists and belongs to the candidate, and the interview step exists and belongs to the position's interview flow.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: The unique identifier of the candidate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - applicationId
+                - stage
+              properties:
+                applicationId:
+                  type: integer
+                  description: The unique identifier of the application
+                stage:
+                  type: integer
+                  description: The unique identifier of the interview step (stage) to set
+      responses:
+        '200':
+          description: Successfully updated candidate stage
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: Application ID
+                  positionId:
+                    type: integer
+                    description: Position ID
+                  candidateId:
+                    type: integer
+                    description: Candidate ID
+                  applicationDate:
+                    type: string
+                    format: date-time
+                    description: Application date
+                  currentInterviewStep:
+                    type: integer
+                    description: Updated interview step ID
+                  notes:
+                    type: string
+                    nullable: true
+                    description: Application notes
+                  position:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      title:
+                        type: string
+                  interviewStep:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+        '400':
+          description: Bad request (invalid ID format, missing required fields, invalid field types, application doesn't belong to candidate, interview step not found, or interview step not valid for position's interview flow)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message describing the validation failure
+        '404':
+          description: Candidate or application not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message indicating candidate or application was not found
+        '500':
+          description: Internal server error
   /upload:
     post:
       summary: Upload a file
@@ -185,4 +276,51 @@ paths:
           description: Invalid file type, only PDF and DOCX are allowed
         '500':
           description: Error during the file upload process
+  /positions/{id}/candidates:
+    get:
+      summary: Get candidates for a position
+      description: Retrieves all candidates currently in the recruitment process for a specific position, including their current interview step and average interview score.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: The unique identifier of the position
+      responses:
+        '200':
+          description: Successfully retrieved candidates for the position
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    candidateId:
+                      type: integer
+                      description: Unique identifier of the candidate
+                    fullName:
+                      type: string
+                      description: Full name of the candidate (firstName + lastName)
+                    currentInterviewStep:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          description: Unique identifier of the interview step
+                        name:
+                          type: string
+                          description: Name of the interview step
+                      description: Current interview step information
+                    averageScore:
+                      type: number
+                      nullable: true
+                      description: Average score from all interviews for this application (null if no interviews exist)
+        '400':
+          description: Bad request (invalid position ID format)
+        '404':
+          description: Position not found
+        '500':
+          description: Internal server error
 
