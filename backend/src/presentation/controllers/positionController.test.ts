@@ -22,9 +22,19 @@ describe('positionController', () => {
   });
 
   describe('getPositionCandidatesController', () => {
+    const mockPrisma = {} as any;
+
+    beforeEach(() => {
+      mockRequest = {
+        params: { id: '1' },
+        prisma: mockPrisma,
+      };
+    });
+
     it('should return 400 for invalid position ID format', async () => {
       mockRequest = {
         params: { id: 'invalid' },
+        prisma: mockPrisma,
       };
 
       await getPositionCandidatesController(
@@ -40,6 +50,7 @@ describe('positionController', () => {
     it('should return 404 when position is not found', async () => {
       mockRequest = {
         params: { id: '999' },
+        prisma: mockPrisma,
       };
       (positionService.getPositionCandidates as jest.Mock).mockRejectedValue(
         new Error('Position not found'),
@@ -55,9 +66,6 @@ describe('positionController', () => {
     });
 
     it('should return 200 with candidates array when successful', async () => {
-      mockRequest = {
-        params: { id: '1' },
-      };
       const mockCandidates = [
         {
           candidateId: 1,
@@ -78,15 +86,12 @@ describe('positionController', () => {
         mockResponse as Response,
       );
 
-      expect(positionService.getPositionCandidates).toHaveBeenCalledWith(1);
+      expect(positionService.getPositionCandidates).toHaveBeenCalledWith(1, mockPrisma);
       expect(mockStatus).toHaveBeenCalledWith(200);
       expect(mockJson).toHaveBeenCalledWith(mockCandidates);
     });
 
     it('should return 200 with empty array when no candidates exist', async () => {
-      mockRequest = {
-        params: { id: '1' },
-      };
       (positionService.getPositionCandidates as jest.Mock).mockResolvedValue([]);
 
       await getPositionCandidatesController(
@@ -99,9 +104,6 @@ describe('positionController', () => {
     });
 
     it('should return 500 for unexpected errors', async () => {
-      mockRequest = {
-        params: { id: '1' },
-      };
       (positionService.getPositionCandidates as jest.Mock).mockRejectedValue(
         new Error('Database connection error'),
       );
@@ -114,7 +116,6 @@ describe('positionController', () => {
       expect(mockStatus).toHaveBeenCalledWith(500);
       expect(mockJson).toHaveBeenCalledWith({
         error: 'Internal Server Error',
-        message: 'Database connection error',
       });
     });
   });

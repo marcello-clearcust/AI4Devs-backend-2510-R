@@ -4,8 +4,6 @@ import { WorkExperience } from './WorkExperience';
 import { Resume } from './Resume';
 import { Application } from './Application';
 
-const prisma = new PrismaClient();
-
 export class Candidate {
     id?: number;
     firstName: string;
@@ -31,7 +29,7 @@ export class Candidate {
         this.applications = data.applications || [];
     }
 
-    async save() {
+    async save(prisma: PrismaClient) {
         const candidateData: any = {};
 
         // Solo añadir al objeto candidateData los campos que no son undefined
@@ -126,7 +124,7 @@ export class Candidate {
         }
     }
 
-    static async findOne(id: number): Promise<Candidate | null> {
+    static async findOne(id: number, prisma: PrismaClient): Promise<Candidate | null> {
         const data = await prisma.candidate.findUnique({
             where: { id: id },
             include: {

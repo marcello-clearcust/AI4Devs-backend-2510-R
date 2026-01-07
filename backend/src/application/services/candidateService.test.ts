@@ -22,10 +22,25 @@ jest.mock('@prisma/client', () => {
 });
 
 import { updateCandidateStage } from './candidateService';
+import { PrismaClient } from '@prisma/client';
 
 describe('candidateService', () => {
+  let mockPrisma: PrismaClient;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPrisma = {
+      candidate: {
+        findUnique: mockCandidateFindUnique,
+      },
+      application: {
+        findUnique: mockApplicationFindUnique,
+        update: mockApplicationUpdate,
+      },
+      interviewStep: {
+        findUnique: mockInterviewStepFindUnique,
+      },
+    } as any;
   });
 
   describe('updateCandidateStage', () => {
@@ -91,7 +106,7 @@ describe('candidateService', () => {
       mockCandidateFindUnique.mockResolvedValue(null);
 
       await expect(
-        updateCandidateStage(candidateId, applicationId, stageId),
+        updateCandidateStage(candidateId, applicationId, stageId, mockPrisma),
       ).rejects.toThrow('Candidate not found');
 
       expect(mockCandidateFindUnique).toHaveBeenCalledWith({
@@ -105,7 +120,7 @@ describe('candidateService', () => {
       mockApplicationFindUnique.mockResolvedValue(null);
 
       await expect(
-        updateCandidateStage(candidateId, applicationId, stageId),
+        updateCandidateStage(candidateId, applicationId, stageId, mockPrisma),
       ).rejects.toThrow('Application not found');
 
       expect(mockCandidateFindUnique).toHaveBeenCalledWith({
@@ -136,7 +151,7 @@ describe('candidateService', () => {
       mockApplicationFindUnique.mockResolvedValue(applicationWithDifferentCandidate);
 
       await expect(
-        updateCandidateStage(candidateId, applicationId, stageId),
+        updateCandidateStage(candidateId, applicationId, stageId, mockPrisma),
       ).rejects.toThrow('Application does not belong to the specified candidate');
     });
 
@@ -146,7 +161,7 @@ describe('candidateService', () => {
       mockInterviewStepFindUnique.mockResolvedValue(null);
 
       await expect(
-        updateCandidateStage(candidateId, applicationId, stageId),
+        updateCandidateStage(candidateId, applicationId, stageId, mockPrisma),
       ).rejects.toThrow('Interview step not found');
 
       expect(mockInterviewStepFindUnique).toHaveBeenCalledWith({
@@ -172,7 +187,7 @@ describe('candidateService', () => {
       mockInterviewStepFindUnique.mockResolvedValue(mockInterviewStep);
 
       await expect(
-        updateCandidateStage(candidateId, applicationId, stageId),
+        updateCandidateStage(candidateId, applicationId, stageId, mockPrisma),
       ).rejects.toThrow('Interview step is not valid for the position\'s interview flow');
     });
 
@@ -182,7 +197,7 @@ describe('candidateService', () => {
       mockInterviewStepFindUnique.mockResolvedValue(mockInterviewStep);
       mockApplicationUpdate.mockResolvedValue(mockUpdatedApplication);
 
-      const result = await updateCandidateStage(candidateId, applicationId, stageId);
+      const result = await updateCandidateStage(candidateId, applicationId, stageId, mockPrisma);
 
       expect(result).toEqual(mockUpdatedApplication);
       expect(mockApplicationUpdate).toHaveBeenCalledWith({
@@ -213,7 +228,7 @@ describe('candidateService', () => {
       mockInterviewStepFindUnique.mockResolvedValue(mockInterviewStep);
       mockApplicationUpdate.mockResolvedValue(mockUpdatedApplication);
 
-      await updateCandidateStage(candidateId, applicationId, stageId);
+      await updateCandidateStage(candidateId, applicationId, stageId, mockPrisma);
 
       // Verify all validations were called
       expect(mockCandidateFindUnique).toHaveBeenCalled();

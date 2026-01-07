@@ -79,9 +79,10 @@ The project follows a layered DDD architecture:
 
 2. **Application Layer** (`backend/src/application/`)
    - Contains application services and business logic orchestration
-   - **Services**: `candidateService.ts`, `fileUploadService.ts`
+   - **Services**: `candidateService.ts`, `fileUploadService.ts`, `positionService.ts`
    - **Validators**: `validator.ts` for input validation
    - Services coordinate between domain models and infrastructure
+   - `candidateService.ts` exposes `updateCandidateStage` for changing candidate workflow stages
 
 3. **Presentation Layer** (`backend/src/presentation/`)
    - Contains controllers that handle HTTP requests/responses
@@ -212,6 +213,8 @@ npm test
 ### API Endpoints
 - `POST /candidates` - Create a new candidate
 - `GET /candidates/:id` - Retrieve a candidate by ID
+- `PUT /candidates/:id/stage` - Update a candidate's stage
+- `GET /positions/:id/candidates` - List candidates for a given position
 - `POST /upload` - Upload a file (CV/resume)
 
 ## Important Constraints

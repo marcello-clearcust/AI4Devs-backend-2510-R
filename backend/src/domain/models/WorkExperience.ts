@@ -1,7 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
-
 export class WorkExperience {
     id?: number;
     company: string;
@@ -21,7 +19,7 @@ export class WorkExperience {
         this.candidateId = data.candidateId;
     }
 
-    async save() {
+    async save(prisma: PrismaClient) {
         const workExperienceData: any = {
             company: this.company,
             position: this.position,

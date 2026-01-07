@@ -1,7 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
-
 export interface PositionCandidate {
   candidateId: number;
   fullName: string;
@@ -12,7 +10,10 @@ export interface PositionCandidate {
   averageScore: number | null;
 }
 
-export const getPositionCandidates = async (positionId: number): Promise<PositionCandidate[]> => {
+export const getPositionCandidates = async (
+  positionId: number,
+  prisma: PrismaClient
+): Promise<PositionCandidate[]> => {
   // First, verify that the position exists
   const position = await prisma.position.findUnique({
     where: { id: positionId },

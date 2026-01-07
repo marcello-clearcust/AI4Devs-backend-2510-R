@@ -5,9 +5,7 @@ import { WorkExperience } from '../../domain/models/WorkExperience';
 import { Resume } from '../../domain/models/Resume';
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
-
-export const addCandidate = async (candidateData: any) => {
+export const addCandidate = async (candidateData: any, prisma: PrismaClient) => {
     try {
         validateCandidateData(candidateData); // Validar los datos del candidato
     } catch (error: any) {
@@ -16,7 +14,7 @@ export const addCandidate = async (candidateData: any) => {
 
     const candidate = new Candidate(candidateData); // Crear una instancia del modelo Candidate
     try {
-        const savedCandidate = await candidate.save(); // Guardar el candidato en la base de datos
+        const savedCandidate = await candidate.save(prisma); // Guardar el candidato en la base de datos
         const candidateId = savedCandidate.id; // Obtener el ID del candidato guardado
 
         // Guardar la educación del candidato
@@ -24,7 +22,7 @@ export const addCandidate = async (candidateData: any) => {
             for (const education of candidateData.educations) {
                 const educationModel = new Education(education);
                 educationModel.candidateId = candidateId;
-                await educationModel.save();
+                await educationModel.save(prisma);
                 candidate.education.push(educationModel);
             }
         }
@@ -34,7 +32,7 @@ export const addCandidate = async (candidateData: any) => {
             for (const experience of candidateData.workExperiences) {
                 const experienceModel = new WorkExperience(experience);
                 experienceModel.candidateId = candidateId;
-                await experienceModel.save();
+                await experienceModel.save(prisma);
                 candidate.workExperience.push(experienceModel);
             }
         }
@@ -43,7 +41,7 @@ export const addCandidate = async (candidateData: any) => {
         if (candidateData.cv && Object.keys(candidateData.cv).length > 0) {
             const resumeModel = new Resume(candidateData.cv);
             resumeModel.candidateId = candidateId;
-            await resumeModel.save();
+            await resumeModel.save(prisma);
             candidate.resumes.push(resumeModel);
         }
         return savedCandidate;
@@ -57,9 +55,9 @@ export const addCandidate = async (candidateData: any) => {
     }
 };
 
-export const findCandidateById = async (id: number): Promise<Candidate | null> => {
+export const findCandidateById = async (id: number, prisma: PrismaClient): Promise<Candidate | null> => {
     try {
-        const candidate = await Candidate.findOne(id); // Cambio aquí: pasar directamente el id
+        const candidate = await Candidate.findOne(id, prisma); // Cambio aquí: pasar directamente el id
         return candidate;
     } catch (error) {
         console.error('Error al buscar el candidato:', error);
@@ -70,7 +68,8 @@ export const findCandidateById = async (id: number): Promise<Candidate | null> =
 export const updateCandidateStage = async (
     candidateId: number,
     applicationId: number,
-    stageId: number
+    stageId: number,
+    prisma: PrismaClient
 ) => {
     // 1. Validate candidate exists
     const candidate = await prisma.candidate.findUnique({

@@ -4,7 +4,7 @@ import { addCandidate, findCandidateById, updateCandidateStage } from '../../app
 export const addCandidateController = async (req: Request, res: Response) => {
     try {
         const candidateData = req.body;
-        const candidate = await addCandidate(candidateData);
+        const candidate = await addCandidate(candidateData, req.prisma);
         res.status(201).json({ message: 'Candidate added successfully', data: candidate });
     } catch (error: unknown) {
         if (error instanceof Error) {
@@ -21,7 +21,7 @@ export const getCandidateById = async (req: Request, res: Response) => {
         if (isNaN(id)) {
             return res.status(400).json({ error: 'Invalid ID format' });
         }
-        const candidate = await findCandidateById(id);
+        const candidate = await findCandidateById(id, req.prisma);
         if (!candidate) {
             return res.status(404).json({ error: 'Candidate not found' });
         }
@@ -54,7 +54,7 @@ export const updateCandidateStageController = async (req: Request, res: Response
         }
 
         // Call service method
-        const updatedApplication = await updateCandidateStage(candidateId, applicationIdNum, stageId);
+        const updatedApplication = await updateCandidateStage(candidateId, applicationIdNum, stageId, req.prisma);
 
         res.status(200).json(updatedApplication);
     } catch (error) {

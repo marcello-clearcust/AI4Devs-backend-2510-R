@@ -16,17 +16,28 @@ jest.mock('@prisma/client', () => {
 });
 
 import { getPositionCandidates } from './positionService';
+import { PrismaClient } from '@prisma/client';
 
 describe('positionService', () => {
+  let mockPrisma: PrismaClient;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPrisma = {
+      position: {
+        findUnique: mockFindUnique,
+      },
+      application: {
+        findMany: mockFindMany,
+      },
+    } as any;
   });
 
   describe('getPositionCandidates', () => {
     it('should throw error when position does not exist', async () => {
       mockFindUnique.mockResolvedValue(null);
 
-      await expect(getPositionCandidates(999)).rejects.toThrow('Position not found');
+      await expect(getPositionCandidates(999, mockPrisma)).rejects.toThrow('Position not found');
       expect(mockFindUnique).toHaveBeenCalledWith({
         where: { id: 999 },
       });
@@ -36,7 +47,7 @@ describe('positionService', () => {
       mockFindUnique.mockResolvedValue({ id: 1 });
       mockFindMany.mockResolvedValue([]);
 
-      const result = await getPositionCandidates(1);
+      const result = await getPositionCandidates(1, mockPrisma);
 
       expect(result).toEqual([]);
       expect(mockFindMany).toHaveBeenCalledWith({
@@ -81,7 +92,7 @@ describe('positionService', () => {
         },
       ]);
 
-      const result = await getPositionCandidates(1);
+      const result = await getPositionCandidates(1, mockPrisma);
 
       expect(result).toEqual([
         {
@@ -117,7 +128,7 @@ describe('positionService', () => {
         },
       ]);
 
-      const result = await getPositionCandidates(1);
+      const result = await getPositionCandidates(1, mockPrisma);
 
       expect(result).toEqual([
         {
@@ -153,7 +164,7 @@ describe('positionService', () => {
         },
       ]);
 
-      const result = await getPositionCandidates(1);
+      const result = await getPositionCandidates(1, mockPrisma);
 
       expect(result).toEqual([
         {
@@ -197,7 +208,7 @@ describe('positionService', () => {
         },
       ]);
 
-      const result = await getPositionCandidates(1);
+      const result = await getPositionCandidates(1, mockPrisma);
 
       expect(result).toHaveLength(2);
       expect(result[0]).toEqual({

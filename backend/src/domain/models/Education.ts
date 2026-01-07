@@ -1,7 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
-
 export class Education {
     id?: number;
     institution: string;
@@ -19,7 +17,7 @@ export class Education {
         this.candidateId = data.candidateId;
     }
 
-    async save() {
+    async save(prisma: PrismaClient) {
         const educationData: any = {
             institution: this.institution,
             title: this.title,

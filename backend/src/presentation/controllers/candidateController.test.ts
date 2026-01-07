@@ -10,6 +10,7 @@ describe('candidateController', () => {
   let mockResponse: Partial<Response>;
   let mockJson: jest.Mock;
   let mockStatus: jest.Mock;
+  let mockPrisma: any;
 
   beforeEach(() => {
     mockJson = jest.fn();
@@ -18,6 +19,7 @@ describe('candidateController', () => {
       status: mockStatus,
       json: mockJson,
     };
+    mockPrisma = {};
     jest.clearAllMocks();
   });
 
@@ -47,6 +49,7 @@ describe('candidateController', () => {
       mockRequest = {
         params: { id: 'invalid' },
         body: { applicationId, stage: stageId },
+        prisma: mockPrisma,
       };
 
       await updateCandidateStageController(
@@ -63,6 +66,7 @@ describe('candidateController', () => {
       mockRequest = {
         params: { id: candidateId.toString() },
         body: { stage: stageId },
+        prisma: mockPrisma,
       };
 
       await updateCandidateStageController(
@@ -81,6 +85,7 @@ describe('candidateController', () => {
       mockRequest = {
         params: { id: candidateId.toString() },
         body: { applicationId },
+        prisma: mockPrisma,
       };
 
       await updateCandidateStageController(
@@ -99,6 +104,7 @@ describe('candidateController', () => {
       mockRequest = {
         params: { id: candidateId.toString() },
         body: { applicationId: 'not-a-number', stage: stageId },
+        prisma: mockPrisma,
       };
 
       await updateCandidateStageController(
@@ -117,6 +123,7 @@ describe('candidateController', () => {
       mockRequest = {
         params: { id: candidateId.toString() },
         body: { applicationId, stage: 'not-a-number' },
+        prisma: mockPrisma,
       };
 
       await updateCandidateStageController(
@@ -135,6 +142,7 @@ describe('candidateController', () => {
       mockRequest = {
         params: { id: candidateId.toString() },
         body: { applicationId, stage: stageId },
+        prisma: mockPrisma,
       };
       (candidateService.updateCandidateStage as jest.Mock).mockRejectedValue(
         new Error('Candidate not found'),
@@ -153,6 +161,7 @@ describe('candidateController', () => {
       mockRequest = {
         params: { id: candidateId.toString() },
         body: { applicationId, stage: stageId },
+        prisma: mockPrisma,
       };
       (candidateService.updateCandidateStage as jest.Mock).mockRejectedValue(
         new Error('Application not found'),
@@ -171,6 +180,7 @@ describe('candidateController', () => {
       mockRequest = {
         params: { id: candidateId.toString() },
         body: { applicationId, stage: stageId },
+        prisma: mockPrisma,
       };
       (candidateService.updateCandidateStage as jest.Mock).mockRejectedValue(
         new Error('Application does not belong to the specified candidate'),
@@ -191,6 +201,7 @@ describe('candidateController', () => {
       mockRequest = {
         params: { id: candidateId.toString() },
         body: { applicationId, stage: stageId },
+        prisma: mockPrisma,
       };
       (candidateService.updateCandidateStage as jest.Mock).mockRejectedValue(
         new Error('Interview step not found'),
@@ -209,6 +220,7 @@ describe('candidateController', () => {
       mockRequest = {
         params: { id: candidateId.toString() },
         body: { applicationId, stage: stageId },
+        prisma: mockPrisma,
       };
       (candidateService.updateCandidateStage as jest.Mock).mockRejectedValue(
         new Error('Interview step is not valid for the position\'s interview flow'),
@@ -229,6 +241,7 @@ describe('candidateController', () => {
       mockRequest = {
         params: { id: candidateId.toString() },
         body: { applicationId, stage: stageId },
+        prisma: mockPrisma,
       };
       (candidateService.updateCandidateStage as jest.Mock).mockResolvedValue(
         mockUpdatedApplication,
@@ -243,6 +256,7 @@ describe('candidateController', () => {
         candidateId,
         applicationId,
         stageId,
+        mockPrisma,
       );
       expect(mockStatus).toHaveBeenCalledWith(200);
       expect(mockJson).toHaveBeenCalledWith(mockUpdatedApplication);
@@ -252,6 +266,7 @@ describe('candidateController', () => {
       mockRequest = {
         params: { id: candidateId.toString() },
         body: { applicationId, stage: stageId },
+        prisma: mockPrisma,
       };
       (candidateService.updateCandidateStage as jest.Mock).mockRejectedValue(
         new Error('Database connection error'),
@@ -273,6 +288,7 @@ describe('candidateController', () => {
       mockRequest = {
         params: { id: candidateId.toString() },
         body: { applicationId: applicationId.toString(), stage: stageId.toString() },
+        prisma: mockPrisma,
       };
       (candidateService.updateCandidateStage as jest.Mock).mockResolvedValue(
         mockUpdatedApplication,
@@ -287,6 +303,7 @@ describe('candidateController', () => {
         candidateId,
         applicationId,
         stageId,
+        mockPrisma,
       );
       expect(mockStatus).toHaveBeenCalledWith(200);
     });

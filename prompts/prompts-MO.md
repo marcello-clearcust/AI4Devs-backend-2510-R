@@ -307,3 +307,134 @@ Se crearon los tests completos para el nuevo endpoint `PUT /candidates/:id/stage
 
 Todos los tests fueron ejecutados y pasaron exitosamente. La implementación está completa y lista para producción.
 
+---
+
+## Prompt Original
+
+```
+En @openspec/project.md alrededor de las líneas 212 - 215, Actualiza la sección "API Endpoints"
+para incluir los dos nuevos endpoints añadidos en este PR: añade `GET
+/positions/:id/candidates` (para listar candidatos para una posición determinada) y `PUT
+/candidates/:id/stage` (para actualizar la etapa de un candidato), asegurándote de que aparezcan
+junto a las entradas existentes `POST /candidates`, `GET /candidates/:id`, y `POST
+/upload` con descripciones breves que coincidan con el estilo de la sección.
+```
+
+## Resumen de la Respuesta
+
+Se actualizó la sección "API Endpoints" en `openspec/project.md` para incluir los dos nuevos endpoints:
+- `GET /positions/:id/candidates` - Listar candidatos para una posición determinada
+- `PUT /candidates/:id/stage` - Actualizar la etapa de un candidato
+
+Los endpoints fueron añadidos junto a los existentes (`POST /candidates`, `GET /candidates/:id`, `POST /upload`) manteniendo el mismo estilo y formato de descripción breve.
+
+---
+
+## Prompt Original
+
+```
+En @openspec/project.md alrededor de las líneas 80 - 84, La documentación de la capa de Aplicación
+está desactualizada: añade `positionService.ts` a la lista de Servicios y menciona
+el nuevo método `updateCandidateStage` en `candidateService.ts`; actualiza el texto
+bajo "Services" para listar `candidateService.ts`, `fileUploadService.ts`, y
+`positionService.ts`, y añade una nota breve de que `candidateService.ts` ahora
+expone `updateCandidateStage` para cambiar las etapas del flujo de trabajo de los candidatos.
+```
+
+## Resumen de la Respuesta
+
+Se actualizó la documentación de la capa de Aplicación en `openspec/project.md`:
+- Se añadió `positionService.ts` a la lista de servicios
+- Se actualizó la lista de servicios para incluir `candidateService.ts`, `fileUploadService.ts`, y `positionService.ts`
+- Se añadió una nota breve indicando que `candidateService.ts` expone el método `updateCandidateStage` para cambiar las etapas del flujo de trabajo de los candidatos
+
+---
+
+## Prompt Original
+
+```
+En @backend/src/presentation/controllers/positionController.ts alrededor de las líneas 20 -
+21, La respuesta 500 actualmente retorna error.message lo cual puede filtrar información interna;
+en su lugar, registra el error completo en el servidor (usa el logger existente o
+console.error para capturar el error y el stack) y cambia la respuesta en el
+controlador (el return usando res.status(500).json({...})) a un payload genérico
+como { error: 'Internal Server Error' } sin incluir error.message o
+stack; localiza el return en positionController (el handler que referencia res
+y error.message) y reemplaza el mensaje expuesto mientras añades una llamada
+logger.error(error) en el servidor.
+```
+
+## Resumen de la Respuesta
+
+Se mejoró el manejo de errores en `positionController.ts` para evitar la exposición de información interna:
+- Se eliminó `message: error.message` de la respuesta 500 para prevenir la filtración de detalles internos
+- Se añadieron llamadas a `console.error(error)` antes de ambas respuestas 500 para registrar el error completo (incluyendo stack trace) en el servidor
+- Se cambió la respuesta a solo retornar el payload genérico `{ error: 'Internal Server Error' }`
+- Los errores ahora se registran en el servidor para depuración pero no se exponen al cliente
+
+---
+
+## Prompt Original
+
+```
+En @backend/src/application/services/positionService.ts en la línea 3, Reemplaza la
+creación local de un nuevo PrismaClient() en positionService.ts con la instancia
+compartida inyectada de Prisma: elimina la instanciación de PrismaClient() y actualiza cualquier
+función en este módulo que actualmente referencia el prisma local para que en su lugar
+lea del cliente con alcance de request (req.prisma) pasado a los llamadores del servicio;
+asegúrate de que los métodos exportados acepten el request o un parámetro prisma (ej., usa
+req.prisma o un parámetro prisma) y propaga este patrón a otros
+servicios/dominios que actualmente llaman a new PrismaClient() para que todos usen la
+instancia centralizada req.prisma.
+```
+
+## Resumen de la Respuesta
+
+Se refactorizó el código para usar la instancia compartida de Prisma (`req.prisma`) en lugar de crear nuevas instancias de `PrismaClient()`:
+
+### Archivos Modificados:
+
+1. **`backend/src/application/services/positionService.ts`**: 
+   - Se eliminó la creación local de `new PrismaClient()`
+   - Se actualizó `getPositionCandidates()` para aceptar `prisma` como parámetro
+
+2. **`backend/src/presentation/controllers/positionController.ts`**: 
+   - Se actualizó para pasar `req.prisma` al servicio
+
+3. **`backend/src/application/services/candidateService.ts`**: 
+   - Se eliminó la creación local de `new PrismaClient()`
+   - Se actualizaron `addCandidate()`, `findCandidateById()`, y `updateCandidateStage()` para aceptar `prisma` como parámetro
+
+4. **`backend/src/presentation/controllers/candidateController.ts`**: 
+   - Se actualizaron todas las llamadas a métodos del servicio para pasar `req.prisma`
+
+5. **`backend/src/routes/candidateRoutes.ts`**: 
+   - Se actualizó el handler de ruta para pasar `req.prisma` cuando llama directamente a `addCandidate`
+
+6. **Modelos de Dominio** (`Candidate`, `Education`, `WorkExperience`, `Resume`):
+   - Se eliminaron las creaciones locales de `new PrismaClient()`
+   - Se actualizaron los métodos `save()` y `findOne()` para aceptar `prisma` como parámetro
+
+7. **Archivos de Tests**: 
+   - Se actualizaron todos los tests para incluir el parámetro `prisma` en las llamadas a métodos
+   - Se añadieron mocks de `prisma` en los tests de controladores
+
+Todos los servicios y modelos de dominio ahora usan la instancia centralizada `req.prisma` en lugar de crear nuevas instancias de `PrismaClient`, mejorando la gestión de conexiones y siguiendo mejores prácticas de inyección de dependencias.
+
+---
+
+## Prompt Original
+
+```
+Ejecuta los tests para verificar si algo está roto
+```
+
+## Resumen de la Respuesta
+
+Se ejecutaron los tests del backend para verificar que todos los cambios funcionan correctamente. Todos los tests pasaron exitosamente:
+- **4 suites de tests** pasaron
+- **31 tests** pasaron en total
+- **0 fallos**
+
+Los tests cubrieron todos los escenarios incluyendo los nuevos cambios relacionados con la inyección de Prisma y el manejo de errores. La salida de `console.error` en los tests es esperada ya que proviene del test de manejo de errores que verifica el registro de errores en el servidor. La implementación está completa y lista para producción.
+

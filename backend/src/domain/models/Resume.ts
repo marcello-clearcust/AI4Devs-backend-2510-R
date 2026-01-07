@@ -1,7 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
-
 export class Resume {
     id: number;
     candidateId: number;
@@ -17,14 +15,14 @@ export class Resume {
         this.uploadDate = new Date();
     }
 
-    async save(): Promise<Resume> {
+    async save(prisma: PrismaClient): Promise<Resume> {
         if (!this.id) {
-            return await this.create();
+            return await this.create(prisma);
         }
         throw new Error('No se permite la actualización de un currículum existente.');
     }
 
-    async create(): Promise<Resume> {
+    async create(prisma: PrismaClient): Promise<Resume> {
         console.log(this);
 
         const createdResume = await prisma.resume.create({
